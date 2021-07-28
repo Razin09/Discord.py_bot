@@ -233,4 +233,4 @@ iam sus bot pro, the latest version of sus bot with more intresting features
 
 
 
-client.run("ODY5MTA0MTk4NDAxMjgyMDk4.YP5WXA.q7sFZYZkCV6WH7Q070VRiRZrSQM") # bot token. to run the bot
+client.run("Your Bot's Token from discrod Dev Portal") # bot token. to run the bot
