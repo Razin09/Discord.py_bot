@@ -7,9 +7,12 @@ import random
 import imdb
 import time
 import json
+from PyDictionary import PyDictionary
+
 
 moviesDB = imdb.IMDb()   # imdb api, using to get movie data stright from imdb
 client = commands.Bot(command_prefix = ".")   # command prefix to call commands
+dictionary1 = PyDictionary()
 
 dares = [
     "Do freestyle rap for 1 minute about the other participants.",
@@ -67,6 +70,7 @@ truths = [
     "Have you ever ghosted a friend?",
     "What’s one thing in your life you wish you could change?",
 ]
+
 
 
 @client.event
@@ -195,6 +199,31 @@ async def movie(ctx, movie = None):
     await ctx.channel.send(f'main actors - {actorStr}')
 
 @client.command()
+async def word(ctx, word = None):
+    '''
+    this command is and dictionary command
+    just pass the word you want to serch and the bot will pass the noun, verb, synonym and antonym of the word
+    used PyDictionary
+    '''
+    try:
+
+        noun = (dictionary1.meaning(word)['Noun'])
+        verb = (dictionary1.meaning(word)['Verb'])
+        synonym = (dictionary1.synonym(word))
+        antonym = (dictionary1.antonym(word))
+
+        await ctx.channel.send(f"""
+The word = {word}
+
+Noun of {word} -  {noun[0]}
+Verb of {word} -  {verb[0]}
+Synonyms of {word} - {synonym[0]}, {synonym[1]}, {synonym[2]}
+Antonyms of {word} - {antonym[0]}, {antonym[1]}, {antonym[2]}
+        """)
+    except:
+        await ctx.channel.send("Sorry, The word you typed is invalid. Try again")
+
+@client.command()
 async def evil(ctx):
     ''' To rickroll someone from the server, using imgur.com 's embed video file'''
     await ctx.channel.send("https://i.imgur.com/MxAE8Wp.mp4")
@@ -215,6 +244,8 @@ iam sus bot pro, the latest version of sus bot with more intresting features
 .qq {question}  =-= to ask any yes or no questions to the bot
 
 .movie {movie name} =-= to get a movie details
+
+.word {word} =-= to get a word's details from dictionary
 
 .tod {'t' ot 'd'}  =-= Truth or dare game
 
