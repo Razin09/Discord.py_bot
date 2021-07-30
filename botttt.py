@@ -8,68 +8,13 @@ import imdb
 import time
 import json
 from PyDictionary import PyDictionary
+from dadjokes import Dadjoke
+import googletrans
+from googletrans import Translator
+import requests
 
 
-moviesDB = imdb.IMDb()   # imdb api, using to get movie data stright from imdb
 client = commands.Bot(command_prefix = ".")   # command prefix to call commands
-dictionary1 = PyDictionary()
-
-dares = [
-    "Do freestyle rap for 1 minute about the other participants.",
-    "Kiss the person to your left.",
-    "Call your crush",
-    "Dance with no music for 1 minute.",
-    "Let the person on your right draw on your face.",
-    "Drink lemon juice.",
-    "Call a friend, pretend it’s their birthday, and sing “Happy Birthday” to them.",
-    "Pour ice down your pants.",
-    "Spin around 12 times and try to walk straight.",
-    "Talk without closing your mouth.",
-    "You have 5 minutes to write a country song and perform it.",
-    "Do 5 minutes of stand-up comedy.",
-    "Quack like a duck until your next turn.",
-    "Sing the national anthem in a British accent.",
-    "say 'ara ara sayonara'",
-    "Eat a spoonful of sugar.",
-    "Do a silly dance.",
-    "Lick your elbow.",
-    "Go outside and yell “Merry Christmas!”",
-    "Talk and act like a cowboy.",
-    "Draw something blindfolded.",
-    "jump 10 times"
-
-]
-truths = [
-    "What’s the last lie you told?",
-    "What was the most embarrassing thing you’ve ever done on a date?",
-    "Have you ever accidentally hit something (or someone!) with your car?",
-    "Name someone you’ve pretended to like but actually couldn’t stand.",
-    "What’s your most bizarre nickname?",
-    "What’s been your most physically painful experience?",
-    "What’s the craziest thing you’ve done on public transportation?",
-    "If you met a genie, what would your three wishes be?",
-    "Who was your worst kiss ever?",
-    "What’s the craziest thing you’ve done in front of a mirror?",
-    "What’s the meanest thing you’ve ever said about someone else?",
-    "Who are you most jealous of?",
-    "Who’s the oldest person you’ve dated?",
-    "How many selfies do you take a day?",
-    "How many times a week do you wear the same pants?",
-    "Would you date your high school crush today?",
-    "What’s one movie you’re embarrassed to admit you enjoy?",
-    "When’s the last time you apologized? What for?",
-    "What app do you waste the most time on?",
-    "What is the youngest age partner you’d date?",
-    "Have you ever lied about your age?",
-    "What’s your most embarrassing late night purchase?",
-    "Have you ever used a fake ID?",
-    "Which of your family members annoys you the most and why?",
-    "What celebrity do you think is overrated?",
-    "Have you ever lied to your boss?",
-    "What’s the longest you’ve gone without brushing your teeth?"
-    "Have you ever ghosted a friend?",
-    "What’s one thing in your life you wish you could change?",
-]
 
 
 
@@ -126,7 +71,7 @@ async def kick(ctx, member : discord.Member, *, reason=None):
     await member.kick(reason=reason)
     await ctx.channel.send(f"{member} has been kicked out from the server,\nReason = {reason}")
 
-@client.command(aliases = ["qq","QQ","Qq"])
+@client.command(aliases = ["qq"])
 async def _8ball(ctx, *, question):
     '''
     a basic 8ball game. you can ask the bot any yes or no questions.
@@ -158,12 +103,77 @@ async def _8ball(ctx, *, question):
     await ctx.send(f"Question : {question}\nAnswer    : {random.choice(responses)}")
 
 @client.command()
+async def dadjoke(ctx):
+    # a dad joke command. using Dadjoke dictionary
+    dadjoke = Dadjoke()
+    await ctx.channel.send(dadjoke.joke)
+
+@client.command()
 async def tod(ctx, td):
     '''
     basic truth or dare game.
     it'll ask a truth or dare from the truths,dares list.
     you just need to pass t or d after the command.
     '''
+
+    dares = [
+        "Do freestyle rap for 1 minute about the other participants.",
+        "Kiss the person to your left.",
+        "Call your crush",
+        "Dance with no music for 1 minute.",
+        "Let the person on your right draw on your face.",
+        "Drink lemon juice.",
+        "Call a friend, pretend it’s their birthday, and sing “Happy Birthday” to them.",
+        "Pour ice down your pants.",
+        "Spin around 12 times and try to walk straight.",
+        "Talk without closing your mouth.",
+        "You have 5 minutes to write a country song and perform it.",
+        "Do 5 minutes of stand-up comedy.",
+        "Quack like a duck until your next turn.",
+        "Sing the national anthem in a British accent.",
+        "say 'ara ara sayonara'",
+        "Eat a spoonful of sugar.",
+        "Do a silly dance.",
+        "Lick your elbow.",
+        "Go outside and yell “Merry Christmas!”",
+        "Talk and act like a cowboy.",
+        "Draw something blindfolded.",
+        "jump 10 times"
+
+    ]
+
+    truths = [
+        "What’s the last lie you told?",
+        "What was the most embarrassing thing you’ve ever done on a date?",
+        "Have you ever accidentally hit something (or someone!) with your car?",
+        "Name someone you’ve pretended to like but actually couldn’t stand.",
+        "What’s your most bizarre nickname?",
+        "What’s been your most physically painful experience?",
+        "What’s the craziest thing you’ve done on public transportation?",
+        "If you met a genie, what would your three wishes be?",
+        "Who was your worst kiss ever?",
+        "What’s the craziest thing you’ve done in front of a mirror?",
+        "What’s the meanest thing you’ve ever said about someone else?",
+        "Who are you most jealous of?",
+        "Who’s the oldest person you’ve dated?",
+        "How many selfies do you take a day?",
+        "How many times a week do you wear the same pants?",
+        "Would you date your high school crush today?",
+        "What’s one movie you’re embarrassed to admit you enjoy?",
+        "When’s the last time you apologized? What for?",
+        "What app do you waste the most time on?",
+        "What is the youngest age partner you’d date?",
+        "Have you ever lied about your age?",
+        "What’s your most embarrassing late night purchase?",
+        "Have you ever used a fake ID?",
+        "Which of your family members annoys you the most and why?",
+        "What celebrity do you think is overrated?",
+        "Have you ever lied to your boss?",
+        "What’s the longest you’ve gone without brushing your teeth?"
+        "Have you ever ghosted a friend?",
+        "What’s one thing in your life you wish you could change?",
+    ]
+
     if td == "t":
         await ctx.channel.send(random.choice(truths))
     elif td == "d":
@@ -178,6 +188,8 @@ async def movie(ctx, movie = None):
     pass the movie name after the command.
     it'll show the movie title, year, imdb rating, directors and the casting
     '''
+    moviesDB = imdb.IMDb()  # imdb api, using to get movie data stright from imdb
+
     movies = moviesDB.search_movie(movie)
     id = movies[0].getID()
     movie = moviesDB.get_movie(id)
@@ -205,6 +217,7 @@ async def word(ctx, word = None):
     just pass the word you want to serch and the bot will pass the noun, verb, synonym and antonym of the word
     used PyDictionary
     '''
+    dictionary1 = PyDictionary()
     try:
 
         noun = (dictionary1.meaning(word)['Noun'])
@@ -222,6 +235,57 @@ Antonyms of {word} - {antonym[0]}, {antonym[1]}, {antonym[2]}
         """)
     except:
         await ctx.channel.send("Sorry, The word you typed is invalid. Try again")
+
+@client.command(aliases=['tr'])
+async def translate(ctx, lang_to, *args):
+    lang_to = lang_to.lower()
+
+    if lang_to not in googletrans.LANGUAGES and lang_to not in googletrans.LANGCODES:
+        await ctx.channel.send("Inavlid language to translate")
+    text = ' '.join(args)
+    trans = googletrans.Translator()
+    text_trans = trans.translate(text, dest=lang_to).text
+    await ctx.channel.send(f'''
+Text = {text}
+
+translate to '{lang_to}' =  {text_trans}
+''')
+
+@client.command()
+async def covid(ctx, enter_country):
+    '''
+    this command will show us the covid cases on individual country's
+    pass the country name on enter_country
+    ussed covid-19 offical API
+    '''
+
+    url = "https://covid-19-data.p.rapidapi.com/country"
+    querystring = {"name": enter_country}
+
+    headers = {
+        'x-rapidapi-key': "e7875e7294mshd3acf8547625a85p117ba0jsn09f03bb4ce3c",
+        'x-rapidapi-host': "covid-19-data.p.rapidapi.com"
+    }
+    response = requests.request("GET", url, headers=headers, params=querystring)
+
+    country = response.json()[0]['country']
+    code = response.json()[0]['code']
+    confirmed = response.json()[0]['confirmed']
+    recovered = response.json()[0]['recovered']
+    critical = response.json()[0]['critical']
+    deaths = response.json()[0]['deaths']
+    last_update = response.json()[0]['lastUpdate']
+
+    await ctx.channel.send(f"""
+country = {country}.{code}
+    
+confirmed cases = {confirmed}
+critical cases  = {critical}
+recovered cases = {recovered}
+deaths          = {deaths}
+
+last update = {last_update}
+    """)
 
 @client.command()
 async def evil(ctx):
@@ -241,24 +305,18 @@ iam sus bot pro, the latest version of sus bot with more intresting features
 
 -{'always use a dot "." before your commands'}-
 
+.tr {language} {text} =-= Translator, pass language and text to translate.
+.covid {country}  =-=  covid case data's from individual country's
 .qq {question}  =-= to ask any yes or no questions to the bot
-
 .movie {movie name} =-= to get a movie details
-
 .word {word} =-= to get a word's details from dictionary
-
 .tod {'t' ot 'd'}  =-= Truth or dare game
-
+.dadjoke =-= bot will pass some dad jokes
 .math x ? y  =-= to do basics math operations, (eg - .math 2 + 2)
-
 .clear =-= to clear 5 messages from the chat, you can change the value from 0-5
-
 .kick  =-= to kick someone from the server. 
-
 .ping =-= to check your internet ping in ms
-
 .evil  =-= find out whats that is
-
 .helpx  =-= for help
     """)
 
