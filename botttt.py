@@ -3,6 +3,8 @@
 
 import discord
 from discord.ext import commands
+from discord_slash import SlashCommand, SlashContext
+from discord_slash.utils.manage_commands import create_choice, create_option
 import random
 import imdb
 import time
@@ -12,21 +14,21 @@ from dadjokes import Dadjoke
 import googletrans
 from googletrans import Translator
 import requests
+from datetime import datetime
+import pytz
+import asyncio
+import wikipedia
+
 
 
 client = commands.Bot(command_prefix = ".")   # command prefix to call commands
-
+slash = SlashCommand(client, sync_commands=True)  # using for Slash commands
 
 
 @client.event
 async def on_ready():
     ''' to print a message on the console when the bot is ready '''
     print("The bot is online")
-
-@client.command()
-async def ping(ctx):
-    ''' this command will sent the authors internet ping latency on ms'''
-    await ctx.channel.send(f"your ping is {round(client.latency * 1000)} ms")
 
 @client.command()
 async def math(ctx, x:int, op, y:int):
@@ -104,9 +106,55 @@ async def _8ball(ctx, *, question):
 
 @client.command()
 async def dadjoke(ctx):
-    # a dad joke command. using Dadjoke dictionary
-    dadjoke = Dadjoke()
-    await ctx.channel.send(dadjoke.joke)
+    # a dad joke command. using a Dadjoke API
+
+    url = "https://dad-jokes.p.rapidapi.com/random/joke/png"
+    headers = {
+        'x-rapidapi-key': "e7875e7294mshd3acf8547625a85p117ba0jsn09f03bb4ce3c",
+        'x-rapidapi-host': "dad-jokes.p.rapidapi.com"
+    }
+
+    response = requests.request("GET", url, headers=headers)
+
+    joke_body = (response.json()['body'])     # body
+    joke_setup = (joke_body['setup'])              # setup
+    joke_punchline = joke_body['punchline']        # punchline
+
+    await ctx.channel.send('here is an dad joke for ya... ***evil laugh***')
+    await asyncio.sleep(2)
+    await ctx.channel.send(joke_setup)                         # pass joke setup
+    await asyncio.sleep(6)
+    await ctx.channel.send(joke_punchline)                     # pass joke punchline
+
+@client.command()
+async def love(ctx, fname, sname,):
+    '''
+    a love percentage calculator
+    using an API from rapid api
+    '''
+    url = "https://love-calculator.p.rapidapi.com/getPercentage"
+    querystring = {"fname": fname, "sname": sname}
+
+    headers = {
+        'x-rapidapi-key': "e7875e7294mshd3acf8547625a85p117ba0jsn09f03bb4ce3c",
+        'x-rapidapi-host': "love-calculator.p.rapidapi.com"
+    }
+
+    response = requests.request("GET", url, headers=headers, params=querystring)
+
+    json = (response.json())
+    fname = json['fname']
+    sname = json['sname']
+    perc = json['percentage']
+    result = json['result']
+    await asyncio.sleep(1)
+    await ctx.channel.send(f'first name = {fname}')        # fname
+    await asyncio.sleep(1)
+    await ctx.channel.send(f'second name = {sname}')       # sname
+    await asyncio.sleep(2)
+    await ctx.channel.send(f'love percentage = {perc}')    # percentage
+    await asyncio.sleep(1)
+    await ctx.channel.send(f'and ill say that = {result}') # result based on the result
 
 @client.command()
 async def tod(ctx, td):
@@ -252,6 +300,105 @@ translate to '{lang_to}' =  {text_trans}
 ''')
 
 @client.command()
+async def mp3(ctx,url):
+    '''
+    this command will convert a youtube video to an mp3 audio
+    itll give us the audio download link and we can directly download it from there
+    used an mp3 converter API from rapidapi
+    '''
+
+    url_for_id = "https://youtube-mp36.p.rapidapi.com/dl"
+
+    content_id = url[32:]   # we only needed the watch id from the youtube link. so we just needed this
+
+    querystring = {"id": content_id}
+
+    headers = {
+        'x-rapidapi-key': "e7875e7294mshd3acf8547625a85p117ba0jsn09f03bb4ce3c",
+        'x-rapidapi-host': "youtube-mp36.p.rapidapi.com"
+    }
+
+    response = requests.request("GET", url_for_id, headers=headers, params=querystring)
+
+    mp3_link = (response.json()['link'])         # to get the mp3 download link
+    mp3_title = (response.json()['title'])       # to get the title
+
+    await ctx.channel.send(f'''
+title of the video = {mp3_title}
+
+mp3 download link  = {mp3_link}
+
+''')
+
+@client.command()
+async def image(ctx, content, *args):
+    '''
+    image searcher.
+    this command will give us the image of the content passed
+    eg - .image car = this will sent us 2 car images from online
+    used bing image api
+    '''
+
+    content_arg = ' '.join(args)
+    url = "https://bing-image-search1.p.rapidapi.com/images/search"
+    querystring = {"q": content_arg}   # content search
+
+    headers = {
+        'x-rapidapi-key': "e7875e7294mshd3acf8547625a85p117ba0jsn09f03bb4ce3c",
+        'x-rapidapi-host': "bing-image-search1.p.rapidapi.com"
+    }
+    response = requests.request("GET", url, headers=headers, params=querystring)
+    '''
+    some images are not passable.
+    so it'll show us and index erorr.   
+    '''
+    try:
+        result = (response.json())
+        value = (result['value'])
+        img_one = (value[0]['thumbnailUrl'])
+        img_two = (value[1]['thumbnailUrl'])
+        await ctx.channel.send(img_one)            # image one
+        await ctx.channel.send(img_two)            # image two
+    except IndexError:
+        await ctx.channel.send("Sorry, invalid image to search. Try again with another content")
+
+@client.command()
+async def time(ctx):
+    # IST
+    tz_IN = pytz.timezone('Asia/Kolkata')
+    datetime_IN = datetime.now(tz_IN)
+    # HST
+    tz_US_hw = pytz.timezone('US/Hawaii')
+    datetime_US_hw = datetime.now(tz_US_hw)
+    # AKDT
+    tz_US_al = pytz.timezone('US/Alaska')
+    datetime_US_al = datetime.now(tz_US_al)
+    # PDT
+    tz_US_pa = pytz.timezone('US/Pacific')
+    datetime_US_pa = datetime.now(tz_US_pa)
+    # MDT
+    tz_US_mt = pytz.timezone('US/Mountain')
+    datetime_US_mt = datetime.now(tz_US_mt)
+    # CDT
+    tz_US_ct = pytz.timezone('US/Central')
+    datetime_US_ct = datetime.now(tz_US_ct)
+    # EDT
+    tz_US_et = pytz.timezone('US/Eastern')
+    datetime_US_et = datetime.now(tz_US_et)
+    # TRT
+    tz_EU_tur = pytz.timezone('Europe/Istanbul')
+    datetime_EU_tur = datetime.now(tz_EU_tur)
+
+    await ctx.channel.send(datetime_IN.strftime("Indian Standard Time     - %Y-%m-%d %I:%M:%p %Z"))
+    await ctx.channel.send(datetime_US_hw.strftime("Hawaii Standard Time     - %Y-%m-%d %I:%M:%p %Z"))
+    await ctx.channel.send(datetime_US_al.strftime("Alaska Daylight Time     - %Y-%m-%d %I:%M:%p %Z"))
+    await ctx.channel.send(datetime_US_pa.strftime("Pacific Time             - %Y-%m-%d %I:%M:%p %Z"))
+    await ctx.channel.send(datetime_US_mt.strftime("Mountain Time            - %Y-%m-%d %I:%M:%p %Z"))
+    await ctx.channel.send(datetime_US_ct.strftime("Central Time             - %Y-%m-%d %I:%M:%p %Z"))
+    await ctx.channel.send(datetime_US_et.strftime("Eastern Time             - %Y-%m-%d %I:%M:%p %Z"))
+    await ctx.channel.send(datetime_EU_tur.strftime("Turkey Time              - %Y-%m-%d %I:%M:%p TRT"))
+
+@client.command()
 async def covid(ctx, enter_country):
     '''
     this command will show us the covid cases on individual country's
@@ -287,6 +434,40 @@ deaths          = {deaths}
 last update = {last_update}
     """)
 
+# @client.command()
+# async def gold(message, ara = None):
+#     ara = message.author
+#     print(ara)
+#     await ara.send('https://en.wikipedia.org/wiki/Gold')
+
+@client.command()
+async def rate(ctx, amount, amount_from, ara, amount_to,):
+    '''
+    Currency exchanger command.
+    the command capable of delivering real-time exchange rate data for 170 world currencies.
+    eg  - .rate 12 USD to INR
+    '''
+
+    try:
+        url = "https://fixer-fixer-currency-v1.p.rapidapi.com/convert"
+        querystring = {"amount": amount, "to": amount_to, "from": amount_from}
+        headers = {
+            'x-rapidapi-key': "e7875e7294mshd3acf8547625a85p117ba0jsn09f03bb4ce3c",
+            'x-rapidapi-host': "fixer-fixer-currency-v1.p.rapidapi.com"
+        }
+        response = requests.request("GET", url, headers=headers, params=querystring)
+
+        result = response.json()['result']
+        await ctx.channel.send(f"""
+Currency exchange Amount = {amount}
+from = {amount_from}
+to = {amount_to}
+    
+result = {result}
+        """)
+    except:
+        await ctx.channel.send("Invalid currency or command")
+
 @client.command()
 async def evil(ctx):
     ''' To rickroll someone from the server, using imgur.com 's embed video file'''
@@ -308,9 +489,14 @@ iam sus bot pro, the latest version of sus bot with more intresting features
 .tr {language} {text} =-= Translator, pass language and text to translate.
 .covid {country}  =-=  covid case data's from individual country's
 .qq {question}  =-= to ask any yes or no questions to the bot
+.rate {X to Y} =-= delivering real-time exchange rate for 170 world currencies.
 .movie {movie name} =-= to get a movie details
+.mp3 {youtube video link} =-= Convert and download any YouTube video into 
+.image {content}   =-= Image Searcher from bing
 .word {word} =-= to get a word's details from dictionary
+.time =-= to print different time zone's time
 .tod {'t' ot 'd'}  =-= Truth or dare game
+.love {fname} {sname} =-= a love percentage calculator
 .dadjoke =-= bot will pass some dad jokes
 .math x ? y  =-= to do basics math operations, (eg - .math 2 + 2)
 .clear =-= to clear 5 messages from the chat, you can change the value from 0-5
@@ -320,6 +506,99 @@ iam sus bot pro, the latest version of sus bot with more intresting features
 .helpx  =-= for help
     """)
 
+@slash.slash(
+    # add a name to the slash, this name will display when you type /
+    name="wiki",
+    # add the description to it
+    description="Search anything on wikipedia",
+    # you have to pass the guild ids
+    guild_ids=[868506526002851861],
+)
+async def wiki_searcher(ctx: SlashContext, content):
+    '''
+    wikipedia searcher.
+    it'll pass the page title, summary, readmore url etc
+    function name isn't matters for this.
+    '''
+    await ctx.send(f'Searching for {content} ...')
+    try:
+        page = wikipedia.page(content)
+        sum = page.summary
+        title = page.title
+        url = page.url
+        image = page.images[0]
+        await ctx.channel.send(f"""
+- {title} -
+
+{sum[0:400]}....click here to read more {url}
+""")
+    except:
+        await asyncio.sleep(1)
+        await ctx.channel.send('Searching failed. try again with another content')
+
+@slash.slash(
+    name="covid",
+    description="get covid stats for a country",
+    guild_ids=[868506526002851861],
+)
+
+async def covid_searcher(ctx:SlashContext, country):
+    url = "https://covid-19-data.p.rapidapi.com/country"
+    querystring = {"name": country}
+
+    headers = {
+        'x-rapidapi-key': "e7875e7294mshd3acf8547625a85p117ba0jsn09f03bb4ce3c",
+        'x-rapidapi-host': "covid-19-data.p.rapidapi.com"
+    }
+    response = requests.request("GET", url, headers=headers, params=querystring)
+
+    country = response.json()[0]['country']
+    code = response.json()[0]['code']
+    confirmed = response.json()[0]['confirmed']
+    recovered = response.json()[0]['recovered']
+    critical = response.json()[0]['critical']
+    deaths = response.json()[0]['deaths']
+    last_update = response.json()[0]['lastUpdate']
+
+    embed = discord.Embed(title=f'COVID-19 Statistics for {country}', description=f'{code}',color=0x50f2a9)
+    embed.set_author(name='sus')
+    embed.set_thumbnail(url='https://www.fda.gov/files/Coronavirus_3D_illustration_by_CDC_1600x900.png')
+    embed.set_footer(text='stay home, stay safe')
+
+    embed.add_field(name='Cases',value=confirmed,inline=True)
+    embed.add_field(name='Deaths',value=deaths,inline=True)
+    embed.add_field(name='Recovered',value=recovered,inline=True)
+    embed.add_field(name='Critical cases ',value=critical,inline=True)
+    embed.add_field(name='Code',value=code,inline=True)
+    embed.add_field(name='Last update',value=last_update,inline=False)
+
+    await ctx.send(embed=embed)
 
 
-client.run("Your Bot's Token from discrod Dev Portal") # bot token. to run the bot
+#     await ctx.send(f"""
+#     country = {country}.{code}
+#
+# confirmed cases = {confirmed}
+# critical cases  = {critical}
+# recovered cases = {recovered}
+# deaths          = {deaths}
+#
+# last update     = {last_update}
+#         """)
+
+@slash.slash(
+    name="ping",
+    description="Get your internet ping in ms",
+    guild_ids=[868506526002851861],
+)
+
+async def xping(ctx):
+    _ping = (f"your ping is {round(client.latency * 1000)} ms")
+
+    myEmbed = discord.Embed(title="Ping in ms", description='to check your internet ping', color=0xe68f39)
+    myEmbed.add_field(name='Ping:', value=_ping, inline= True)
+    myEmbed.set_footer(text='by sus bot pro')
+    await ctx.send(embed=myEmbed)
+
+
+client.run('bot token') # bot token. to run the bot
